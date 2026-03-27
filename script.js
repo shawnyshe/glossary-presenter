@@ -129,12 +129,41 @@ function renderHeader() {
   columns.forEach(col => {
     const th = document.createElement("th");
     th.textContent = col;
+
+    const resizer = document.createElement("div");
+    resizer.className = "resizer";
+    th.appendChild(resizer);
+
+    setupColumnResize(th, resizer);
+
     header.appendChild(th);
   });
 
   const delTh = document.createElement("th");
   delTh.textContent = "❌";
   header.appendChild(delTh);
+}
+
+function setupColumnResize(th, resizer) {
+  let startX, startWidth;
+
+  resizer.addEventListener("mousedown", e => {
+    startX = e.pageX;
+    startWidth = th.offsetWidth;
+
+    document.addEventListener("mousemove", resizeColumn);
+    document.addEventListener("mouseup", stopResize);
+  });
+
+  function resizeColumn(e) {
+    const newWidth = startWidth + (e.pageX - startX);
+    th.style.width = newWidth + "px";
+  }
+
+  function stopResize() {
+    document.removeEventListener("mousemove", resizeColumn);
+    document.removeEventListener("mouseup", stopResize);
+  }
 }
 
 function renderBody() {
