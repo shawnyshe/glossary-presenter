@@ -17,15 +17,17 @@ function setSubtitle(text) {
 }
 
 function setAuthor(name) {
-  if (!name) return;
-  let footer = document.getElementById("author");
-  if (!footer) {
-    footer = document.createElement("p");
-    footer.id = "author";
-    document.body.appendChild(footer);
+  const authorEl = document.getElementById("appAuthor");
+  if (!authorEl) return;
+
+  if (!name) {
+    authorEl.textContent = "";
+    return;
   }
-  footer.textContent = `Created by ${name}`;
+
+  authorEl.textContent = `Created by ${name}`;
 }
+
 
 /* -----------------------------
    File handling
