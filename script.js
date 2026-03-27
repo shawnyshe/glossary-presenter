@@ -28,6 +28,24 @@ function setAuthor(name) {
   authorEl.textContent = `Created by ${name}`;
 }
 
+function updateEntryCount(visibleOnly = false) {
+  const el = document.getElementById("entryCount");
+  if (!el) return;
+
+  const count = visibleOnly
+    ? getFilteredData().length
+    : data.length;
+
+  if (!count) {
+    el.textContent = "";
+    return;
+  }
+
+  el.textContent =
+    count === 1
+      ? "1 entry"
+      : `${count} entries in total`;
+}
 
 /* -----------------------------
    File handling
@@ -73,6 +91,7 @@ function parseCSV(text) {
   });
 
   renderTable();
+  updateEntryCount();
 }
 
 /* -----------------------------
@@ -253,12 +272,14 @@ function addRow() {
   columns.forEach(col => (newRow[col] = ""));
   data.push(newRow);
   renderBody();
+  updateEntryCount();
 }
 
 function deleteRow(index) {
   if (!confirm("Delete this entry?")) return;
   data.splice(index, 1);
   renderBody();
+  updateEntryCount();
 }
 
 function getFilteredData() {
