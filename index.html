@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Glossary Viewer</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Aldrich&family=Caesar+Dressing&display=swap" rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<header>
+  <h1 id="appTitle">GLOSSARY PRESENTER</h1>
+  <p id="appSubtitle">🖥️ Import and Present Your Terminology</p>
+</header>
+
+<section class="settings">
+  <h2>SETTINGS</h2>
+
+  <div class="settings-row">
+    <input
+      type="text"
+      placeholder="Glossary title"
+      oninput="setTitle(this.value)"
+    >
+
+    <input
+      type="text"
+      placeholder="Subtitle"
+      oninput="setSubtitle(this.value)"
+    >
+
+    <input
+      type="text"
+      placeholder="Author"
+      oninput="setAuthor(this.value)"
+    >
+  </div>
+</section>
+
+<section
+  class="upload"
+  ondrop="handleDrop(event)"
+  ondragover="event.preventDefault()"
+>
+  <p>
+    📁 Drag & drop your CSV file here<br>
+    or click to upload
+  </p>
+  <input
+    type="file"
+    accept=".csv"
+    onchange="handleFile(this.files[0])"
+  >
+</section>
+
+<!-- ✅ JavaScript will render the table here -->
+<section id="glossary"></section>
+
+<script src="script.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+</body>
+</html>

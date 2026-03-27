@@ -1,0 +1,242 @@
+/* =========================
+   Fonts
+   ========================= */
+
+.caesar-dressing-regular {
+  font-family: "Caesar Dressing", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.aldrich-regular {
+  font-family: "Aldrich", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
+  --theme: #4aa3ff;
+}
+
+body {
+  font-family:
+    "Calibri",
+    "Segoe UI",
+    "Inter",
+    "Helvetica Neue",
+    Arial,
+    system-ui,
+    sans-serif;
+
+  background: #0f172a;
+  color: #e5e7eb;
+  margin: 0;
+  padding: 20px;
+  font-size: 1.5rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  font-size: 5rem;
+  letter-spacing: 1px;
+}
+
+header h1 {
+  font-family: "Caesar Dressing", system-ui;
+  font-weight: 600;
+}
+
+header h1 {
+  color: var(--theme);
+}
+
+.settings {
+  background: rgba(148, 163, 184, 0.08); /* faint cool grey */
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 50px;
+  margin-top: 100px;
+}
+
+.settings h2 {
+  font-family: "Aldrich", sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+}
+
+.settings,
+.settings input,
+.settings label {
+  font-family: "Aldrich", sans-serif;
+  font-size: 1rem;
+}
+
+.field {
+  margin-bottom: 15px;
+}
+
+.field label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+.upload {
+  border: 2px dashed #334155;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 30px;
+}
+
+.upload input {
+  display: none;
+}
+
+
+.settings-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.settings-row input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+/* =========================
+   Glossary Table (NEW)
+   ========================= */
+
+.table-wrapper {
+  max-height: 520px;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid #1e293b;
+  background: #020617;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: #020617;
+  color: #94a3b8;
+  padding: 10px;
+  text-align: left;
+  font-family: "Aldrich", sans-serif;
+  border-bottom: 1px solid #1e293b;
+  z-index: 2;
+}
+
+tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #1e293b;
+  vertical-align: top;
+}
+
+tbody tr:hover {
+  background: rgba(74, 163, 255, 0.12); /* theme hover */
+}
+
+td.editable {
+  cursor: text;
+}
+
+td.editable:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+td.delete-cell {
+  width: 48px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0.6;
+}
+
+td.delete-cell:hover {
+  background: rgba(255, 0, 0, 0.15);
+  opacity: 1;
+}
+
+button#addRowBtn {
+  margin-bottom: 14px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: "Aldrich", sans-serif;
+  background: var(--theme);
+  color: #020617;
+}
+
+button#addRowBtn:hover {
+  filter: brightness(1.05);
+}
+
+.glossary-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.glossary-controls input,
+.glossary-controls select {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #1e293b;
+  background: #020617;
+  color: #e5e7eb;
+  font-family: "Aldrich", sans-serif;
+}
+
+.glossary-controls input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.glossary-controls select {
+  min-width: 160px;
+}
+
+.glossary-controls button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  background: #020617;
+  color: #e5e7eb;
+  font-family: "Aldrich", sans-serif;
+  cursor: pointer;
+}
+
+.glossary-controls button:hover {
+  background: rgba(74, 163, 255, 0.15);
+}
