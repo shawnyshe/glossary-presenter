@@ -311,50 +311,39 @@ function exportJSON() {
 }
 
 function exportHTML() {
-  const rows = getFilteredData();
-  if (!rows.length) return alert("No data to export.");
+  // Clone the entire document
+  const clone = document.documentElement.cloneNode(true);
 
-  let html = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Glossary Export</title>
-<style>
-  body { font-family: system-ui, sans-serif; padding: 20px; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #ccc; padding: 8px; }
-  th { background: #f5f5f5; }
-</style>
-</head>
-<body>
+  // Remove file input (security + useless offline)
+  clone.querySelectorAll('input[type="file"]').forEach(el => el.remove());
 
-<h1>Glossary Export</h1>
-<table>
-  <thead>
-    <tr>
-      ${columns.map(c => `<th>${c}</th>`).join("")}
-    </tr>
-  </thead>
-  <tbody>
-`;
+  // Inline all styles
+  const styleText = Array.from(document.styleSheets)
+    .map(sheet => {
+      try {
+        return Array.from(sheet.cssRules)
+          .map(rule => rule.cssText)
+          .join("\n");
+      } catch (e) {
+        // cross-origin stylesheets (Google Fonts)
+        return "";
+      }
+    })
+    .join("\n");
 
-  rows.forEach(row => {
-    html += "<tr>";
-    columns.forEach(col => {
-      html += `<td>${row[col] ?? ""}</td>`;
-    });
-    html += "</tr>";
-  });
+  const styleEl = document.createElement("style");
+  styleEl.textContent = styleText;
+  clone.querySelector("head").appendChild(styleEl);
 
-  html += `
-  </tbody>
-</table>
-</body>
-</html>
-`;
+  // Remove script tags (freeze the snapshot)
+  clone.querySelectorAll("script").forEach(s => s.remove());
 
-  downloadFile(html, "glossary.html", "text/html");
+  // Final HTML
+  const html =
+    "<!DOCTYPE html>\n" +
+    clone.outerHTML;
+
+  downloadFile(html, "glossary_snapshot.html", "text/html");
 }
 
 function downloadFile(content, filename, type) {
