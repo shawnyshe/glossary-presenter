@@ -240,3 +240,17 @@ button#addRowBtn:hover {
 .glossary-controls button:hover {
   background: rgba(74, 163, 255, 0.15);
 }
+
+th {
+  position: relative;
+}
+
+th .resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+}
