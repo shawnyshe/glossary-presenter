@@ -6,10 +6,9 @@ let data = [];
 /* -----------------------------
    Existing utility functions
 ----------------------------- */
-
 function setTitle(text) {
-  document.getElementById("appTitle").textContent =
-    text || "Termify Glossary Viewer";
+  if (!text) return; //
+  document.getElementById("appTitle").textContent = text;
 }
 
 function setSubtitle(text) {
