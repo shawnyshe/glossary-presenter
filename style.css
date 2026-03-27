@@ -43,14 +43,16 @@ header {
 header h1 {
   font-size: 5rem;
   letter-spacing: 1px;
-}
-
-header h1 {
   font-family: "Caesar Dressing", system-ui;
   font-weight: 600;
+  color: var(--theme);
 }
 
-header h1 {
+#appAuthor {
+  font-size: 1rem;
+  margin-top: 8px;
+  font-family: "Caesar Dressing", system-ui;
+  font-weight: 300;
   color: var(--theme);
 }
 
