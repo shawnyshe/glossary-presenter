@@ -48,30 +48,61 @@ header h1 {
   color: var(--theme);
 }
 
-#appAuthor {
-  font-size: 1rem;
+#appSubtitle {
+  font-size: 1.5rem;
   margin-top: 8px;
+  font-family:
+    "Calibri",
+    "Segoe UI",
+    "Inter",
+    "Helvetica Neue",
+    Arial,
+    system-ui,
+    sans-serif;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+#entryCount {
+  font-size: 1.5rem;
+  margin-top: 8px;
+  font-family:
+    "Calibri",
+    "Segoe UI",
+    "Inter",
+    "Helvetica Neue",
+    Arial,
+    system-ui,
+    sans-serif;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+#appAuthor {
+  font-size: 1.5rem;
+  margin-top: 30px;
   font-family: "Caesar Dressing", system-ui;
   font-weight: 300;
   color: var(--theme);
 }
 
 .settings {
-  background: rgba(148, 163, 184, 0.08); /* faint cool grey */
+  background: rgba(148, 163, 184, 0.16); /* faint cool grey */
   border-radius: 14px;
   padding: 20px 22px;
   margin-bottom: 50px;
-  margin-top: 60px;
+  margin-top: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.1); /*If you want definition without more brightness*/
 }
 
 .settings h2 {
   font-family: "Aldrich", sans-serif;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 1.5rem;
-  margin-top: 0;
   margin-bottom: 10px;
-  letter-spacing: 0.12em;
-  opacity: 0.85;
+  letter-spacing: 0.06em; /* tighter = sharper */
+  color: #e5e7eb;  /* full-opacity light text */
+  opacity: 1;
 }
 
 .settings,
@@ -100,15 +131,62 @@ header h1 {
 
 .upload {
   border: 2px dashed #334155;
-  border-radius: 16px;
-  padding: 20px;
+  border-radius: 18px;
+  padding: 20px 30px;
   text-align: center;
-  cursor: pointer;
   margin-bottom: 30px;
+  cursor: pointer;
+  background: rgba(148, 163, 184, 0.05);
+  transition: 
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.upload p {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.5;
+  color: #e5e7eb;  /* bright neutral text */
+  opacity: 1;
+  font-family:
+    "Calibri",
+    "Segoe UI",
+    "Inter",
+    "Helvetica Neue",
+    Arial,
+    system-ui,
+    sans-serif;
+}
+
+.upload-main {
+  display: block;
+  font-size: 2rem;
+  font-weight: 300;
+  color: #f8fafc;
+}
+
+.upload-sub {
+  display: block;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: #94a3b8;
 }
 
 .upload input {
   display: none;
+}
+
+.upload.dragover {
+  background: rgba(74, 163, 255, 0.12);
+  border-color: var(--theme);
+  transform: scale(1.01);
+}
+
+.upload-icon {
+  font-size: 5rem;
+  display: inline-block;
+  margin-bottom: 5px;
 }
 
 
