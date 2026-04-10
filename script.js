@@ -62,10 +62,42 @@ function handleFile(file) {
     alert("Please upload a CSV file.");
     return;
   }
+
+  document.querySelector(".upload p").textContent =
+    `✅ Loaded: ${file.name}`;
+
   const reader = new FileReader();
   reader.onload = e => parseCSV(e.target.result);
   reader.readAsText(file);
 }
+
+document.querySelector(".upload").addEventListener("click", () => {
+  document.querySelector(".upload input[type='file']").click();
+});
+
+const uploadEl = document.querySelector(".upload");
+const fileInput = uploadEl.querySelector("input");
+
+uploadEl.addEventListener("click", () => fileInput.click());
+
+uploadEl.addEventListener("dragover", e => {
+  e.preventDefault();
+  uploadEl.classList.add("dragover");
+});
+
+uploadEl.addEventListener("dragleave", () => {
+  uploadEl.classList.remove("dragover");
+});
+
+uploadEl.addEventListener("drop", e => {
+  e.preventDefault();
+  uploadEl.classList.remove("dragover");
+  handleFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener("change", () => {
+  handleFile(fileInput.files[0]);
+});
 
 /* -----------------------------
    CSV parsing (dynamic columns)
@@ -226,7 +258,7 @@ function renderBody() {
     });
 
     const delTd = document.createElement("td");
-    delTd.textContent = "🗑️";
+    delTd.textContent = "?️";
     delTd.className = "delete-cell";
     delTd.onclick = () => deleteRow(rowIndex);
     tr.appendChild(delTd);
