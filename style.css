@@ -42,7 +42,7 @@ header {
 
 header h1 {
   font-size: 5rem;
-  letter-spacing: 1px;
+  letter-spacing: 5px;
   font-family: "Caesar Dressing", system-ui;
   font-weight: 600;
   color: var(--theme);
@@ -50,7 +50,7 @@ header h1 {
 
 #appSubtitle {
   font-size: 1.5rem;
-  margin-top: 8px;
+  margin-top: 5px;
   font-family:
     "Calibri",
     "Segoe UI",
@@ -92,6 +92,8 @@ header h1 {
   padding: 20px 22px;
   margin-bottom: 50px;
   margin-top: 50px;
+  margin-left: 100px;
+  margin-right: 100px;
   border: 1px solid rgba(255, 255, 255, 0.1); /*If you want definition without more brightness*/
 }
 
@@ -99,6 +101,7 @@ header h1 {
   font-family: "Aldrich", sans-serif;
   font-weight: 500;
   font-size: 1.5rem;
+  margin-top: 0px;
   margin-bottom: 10px;
   letter-spacing: 0.06em; /* tighter = sharper */
   color: #e5e7eb;  /* full-opacity light text */
@@ -135,6 +138,8 @@ header h1 {
   padding: 20px 30px;
   text-align: center;
   margin-bottom: 30px;
+  margin-left: 100px;
+  margin-right: 100px;
   cursor: pointer;
   background: rgba(148, 163, 184, 0.05);
   transition: 
