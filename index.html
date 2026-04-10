@@ -9,13 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Aldrich&family=Caesar+Dressing&display=swap" rel="stylesheet">
-<link type="text/css" rel="stylesheet" href="css/style.css"/>
+  <link type="text/css" rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
 
 <header>
   <h1 id="appTitle">GLOSSARY PRESENTER</h1>
-  <p id="appSubtitle">🖥️ Import and Present Your Terminology</p>
+  <p id="appSubtitle">Import and Present Your Own Terminology!</p>
   <p id="appAuthor"></p>
   <p id="entryCount"></p>
 </header>
@@ -44,18 +44,20 @@
   </div>
 </section>
 
-<section
-  class="upload"
-  ondrop="handleDrop(event)"
-  ondragover="event.preventDefault()"
->
+<section class="upload">
   <p>
-    📁 Drag & drop your CSV file here<br>
+    <span class="upload-icon">?</span><br>
+    <span class="upload-main">
+      Drag & drop your CSV file here<br>
+      or click to upload<br>
+    </span><br>
+    <span class="upload-sub">
+      SUPPORT ANY EXCEL WITH CLEAR COLUMN HEADINGS
+    </span> 
   </p>
   <input
     type="file"
     accept=".csv"
-    onchange="handleFile(this.files[0])"
   >
 </section>
 
