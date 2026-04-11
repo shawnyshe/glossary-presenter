@@ -366,39 +366,136 @@ function exportJSON() {
 }
 
 function exportHTML() {
-  // Clone the entire document
-  const clone = document.documentElement.cloneNode(true);
+  const rows = getFilteredData();
+  if (!rows.length) {
+    alert("No data to export.");
+    return;
+  }
 
-  // Remove file input (security + useless offline)
-  clone.querySelectorAll('input[type="file"]').forEach(el => el.remove());
+  // Header metadata
+  const title = document.getElementById("appTitle")?.textContent || "";
+  const subtitle = document.getElementById("appSubtitle")?.textContent || "";
+  const author = document.getElementById("appAuthor")?.textContent || "";
+  const count = `${rows.length} entries`;
 
-  // Inline all styles
-  const styleText = Array.from(document.styleSheets)
-    .map(sheet => {
-      try {
-        return Array.from(sheet.cssRules)
-          .map(rule => rule.cssText)
-          .join("\n");
-      } catch (e) {
-        // cross-origin stylesheets (Google Fonts)
-        return "";
-      }
-    })
-    .join("\n");
+  // Build column options
+  const columnOptions =
+    `<option value="__all">All columns</option>` +
+    columns.map(c => `<option value="${c}">${c}</option>`).join("");
 
-  const styleEl = document.createElement("style");
-  styleEl.textContent = styleText;
-  clone.querySelector("head").appendChild(styleEl);
+  // Build table header
+  const tableHead =
+    `<tr>` + columns.map(c => `<th>${c}</th>`).join("") + `</tr>`;
 
-  // Remove script tags (freeze the snapshot)
-  clone.querySelectorAll("script").forEach(s => s.remove());
+  // Build table body
+  const tableBody = rows
+    .map(row =>
+      `<tr>` +
+        columns.map(c => `<td>${row[c] ?? ""}</td>`).join("") +
+      `</tr>`
+    )
+    .join("");
 
-  // Final HTML
-  const html =
-    "<!DOCTYPE html>\n" +
-    clone.outerHTML;
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${title}</title>
 
-  downloadFile(html, "glossary_snapshot.html", "text/html");
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+input, select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border-bottom: 1px solid #1e293b;
+  padding: 6px 8px;
+}
+
+th {
+  background: #020617;
+  position: sticky;
+  top: 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>${title}</h1>
+  <p>${subtitle}</p>
+  <p>${author}</p>
+  <p>${count}</p>
+</header>
+
+<div class="controls">
+  <input type="text" id="searchInput" placeholder="Search...">
+  <select id="columnFilter">
+    ${columnOptions}
+  </select>
+</div>
+
+<table id="glossaryTable">
+  <thead>${tableHead}</thead>
+  <tbody>${tableBody}</tbody>
+</table>
+
+<script>
+const searchInput = document.getElementById("searchInput");
+const columnFilter = document.getElementById("columnFilter");
+const rows = Array.from(document.querySelectorAll("#glossaryTable tbody tr"));
+
+function applyFilter() {
+  const q = searchInput.value.toLowerCase();
+  const col = columnFilter.value;
+
+  rows.forEach(tr => {
+    const cells = Array.from(tr.children);
+    let text = col === "__all"
+      ? cells.map(td => td.textContent).join(" ")
+      : cells[${columns.map(JSON.stringify).indexOf(col)}]?.textContent || "";
+
+    tr.style.display = text.toLowerCase().includes(q) ? "" : "none";
+  });
+}
+
+searchInput.addEventListener("input", applyFilter);
+columnFilter.addEventListener("change", applyFilter);
+</script>
+
+</body>
+</html>
+`;
+
+  downloadFile(html, "glossary_viewer.html", "text/html");
 }
 
 function downloadFile(content, filename, type) {
