@@ -213,6 +213,30 @@ header h1 {
    Glossary Table (NEW)
    ========================= */
 
+/* Apply to both header and body cells */
+#glossaryTable th:nth-child(even),
+#glossaryTable td:nth-child(even) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#glossaryTable thead th {
+  background-color: #020617; /* solid, not transparent */
+  z-index: 3;
+}
+#glossaryTable thead th:nth-child(even) {
+  background-color: #040b1f; /* slightly lighter/darker solid tone */
+}
+
+#glossaryTable th,
+#glossaryTable td {
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+#glossaryTable th:last-child,
+#glossaryTable td:last-child {
+  border-right: none;
+}
+
 .table-wrapper {
   max-height: 520px;
   overflow: auto;
