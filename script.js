@@ -71,32 +71,30 @@ function handleFile(file) {
   reader.readAsText(file);
 }
 
-document.querySelector(".upload").addEventListener("click", () => {
-  document.querySelector(".upload input[type='file']").click();
-});
+document.addEventListener("DOMContentLoaded", () => {
+  const uploadEl = document.querySelector(".upload");
+  const fileInput = uploadEl.querySelector("input");
 
-const uploadEl = document.querySelector(".upload");
-const fileInput = uploadEl.querySelector("input");
+  uploadEl.addEventListener("click", () => fileInput.click());
 
-uploadEl.addEventListener("click", () => fileInput.click());
+  uploadEl.addEventListener("dragover", e => {
+    e.preventDefault();
+    uploadEl.classList.add("dragover");
+  });
 
-uploadEl.addEventListener("dragover", e => {
-  e.preventDefault();
-  uploadEl.classList.add("dragover");
-});
+  uploadEl.addEventListener("dragleave", () => {
+    uploadEl.classList.remove("dragover");
+  });
 
-uploadEl.addEventListener("dragleave", () => {
-  uploadEl.classList.remove("dragover");
-});
+  uploadEl.addEventListener("drop", e => {
+    e.preventDefault();
+    uploadEl.classList.remove("dragover");
+    handleFile(e.dataTransfer.files[0]);
+  });
 
-uploadEl.addEventListener("drop", e => {
-  e.preventDefault();
-  uploadEl.classList.remove("dragover");
-  handleFile(e.dataTransfer.files[0]);
-});
-
-fileInput.addEventListener("change", () => {
-  handleFile(fileInput.files[0]);
+  fileInput.addEventListener("change", () => {
+    handleFile(fileInput.files[0]);
+  });
 });
 
 /* -----------------------------
@@ -471,17 +469,24 @@ th {
 <script>
 const searchInput = document.getElementById("searchInput");
 const columnFilter = document.getElementById("columnFilter");
-const rows = Array.from(document.querySelectorAll("#glossaryTable tbody tr"));
+const table = document.getElementById("glossaryTable");
+const rows = Array.from(table.querySelectorAll("tbody tr"));
+const headers = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent);
 
 function applyFilter() {
   const q = searchInput.value.toLowerCase();
-  const col = columnFilter.value;
+  const selected = columnFilter.value;
 
   rows.forEach(tr => {
     const cells = Array.from(tr.children);
-    let text = col === "__all"
-      ? cells.map(td => td.textContent).join(" ")
-      : cells[${columns.map(JSON.stringify).indexOf(col)}]?.textContent || "";
+    let text = "";
+
+    if (selected === "__all") {
+      text = cells.map(td => td.textContent).join(" ");
+    } else {
+      const index = headers.indexOf(selected);
+      text = index >= 0 ? cells[index].textContent : "";
+    }
 
     tr.style.display = text.toLowerCase().includes(q) ? "" : "none";
   });
