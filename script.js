@@ -363,6 +363,22 @@ function exportJSON() {
   downloadFile(json, "glossary.json", "application/json");
 }
 
+function getAppStyles() {
+  let css = "";
+
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        css += rule.cssText + "\n";
+      }
+    } catch (e) {
+      // Ignore cross-origin styles (Google Fonts)
+    }
+  }
+
+  return css;
+}
+
 function exportHTML() {
   const rows = getFilteredData();
   if (!rows.length) {
@@ -394,57 +410,30 @@ function exportHTML() {
     )
     .join("");
 
+  const appStyles = getAppStyles();
+
   const html = `<!DOCTYPE html>
 <html>
 <head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Aldrich&family=Caesar+Dressing&display=swap" rel="stylesheet">
 <meta charset="UTF-8">
 <title>${title}</title>
 
+<!-- ✅ Embedded app styles -->
 <style>
-body {
-  font-family: system-ui, sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
-  padding: 20px;
-}
+${appStyles}
 
-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.controls {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-input, select {
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #334155;
-  background: #020617;
-  color: #e5e7eb;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  border-bottom: 1px solid #1e293b;
-  padding: 6px 8px;
-}
-
-th {
-  background: #020617;
-  position: sticky;
-  top: 0;
+/* ✅ Viewer-only tweaks */
+.editable,
+.delete-cell,
+.glossary-controls button {
+  display: none;
 }
 </style>
-</head>
 
+</head>
 <body>
 
 <header>
