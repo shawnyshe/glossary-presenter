@@ -337,22 +337,36 @@ function getFilteredData() {
 
 function exportCSV() {
   const rows = getFilteredData();
-  if (!rows.length) return alert("No data to export.");
+  if (!rows.length) {
+    alert("No data to export.");
+    return;
+  }
 
   let csv = "";
 
   // Header
-  csv += columns.join(",") + "\n";
+  csv += columns.join(",") + "\r\n";
 
   // Rows
   rows.forEach(row => {
     const line = columns.map(col =>
-      `"${String(row[col]).replace(/"/g, '""')}"`
+      `"${String(row[col] ?? "").replace(/"/g, '""')}"`
     );
-    csv += line.join(",") + "\n";
+    csv += line.join(",") + "\r\n";
   });
 
-  downloadFile(csv, "glossary.csv", "text/csv");
+  // ✅ UTF-8 BOM for Excel (Chinese-safe)
+  const BOM = "\uFEFF";
+  const blob = new Blob([BOM + csv], {
+    type: "text/csv;charset=utf-8;"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "glossary.csv";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function exportJSON() {
