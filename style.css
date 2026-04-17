@@ -41,7 +41,7 @@ header {
 }
 
 header h1 {
-  font-size: 5rem;
+  font-size: 4rem;
   letter-spacing: 5px;
   font-family: "Caesar Dressing", system-ui;
   font-weight: 600;
@@ -65,7 +65,7 @@ header h1 {
 
 #entryCount {
   font-size: 1.5rem;
-  margin-top: 8px;
+  margin-bottom: 5px;
   font-family:
     "Calibri",
     "Segoe UI",
@@ -81,38 +81,46 @@ header h1 {
 #appAuthor {
   font-size: 1.5rem;
   margin-top: 30px;
+  margin-bottom: 15px;
   font-family: "Caesar Dressing", system-ui;
   font-weight: 300;
   color: var(--theme);
 }
 
-.settings {
-  background: rgba(148, 163, 184, 0.16); /* faint cool grey */
-  border-radius: 14px;
-  padding: 20px 22px;
-  margin-bottom: 50px;
-  margin-top: 50px;
-  margin-left: 100px;
-  margin-right: 100px;
-  border: 1px solid rgba(255, 255, 255, 0.1); /*If you want definition without more brightness*/
+.inline-editable {
+  outline: none;
+  cursor: text;
 }
 
-.settings h2 {
-  font-family: "Aldrich", sans-serif;
-  font-weight: 500;
-  font-size: 1.5rem;
-  margin-top: 0px;
-  margin-bottom: 10px;
-  letter-spacing: 0.06em; /* tighter = sharper */
-  color: #e5e7eb;  /* full-opacity light text */
+.inline-editable::after {
+  content: "✎";
+  font-size: 0.9em;
+  margin-left: 8px;
+  opacity: 0;
+  transform: translateY(-1px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.inline-editable:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.4;
+}
+
+.inline-editable:hover {
+  text-decoration: underline;
+  text-decoration-color: rgba(255,255,255,0.25);
+}
+
+.inline-editable:hover::after {
   opacity: 1;
+  transform: translateY(0);
 }
 
-.settings,
-.settings input,
-.settings label {
-  font-family: "Aldrich", sans-serif;
-  font-size: 1rem;
+.inline-editable:focus {
+  text-decoration: none;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
 }
 
 .field {
@@ -137,12 +145,13 @@ header h1 {
   border-radius: 18px;
   padding: 20px 30px;
   text-align: center;
+  margin-top: 10px;
   margin-bottom: 30px;
   margin-left: 100px;
   margin-right: 100px;
   cursor: pointer;
   background: rgba(148, 163, 184, 0.05);
-  transition: 
+  transition:
     background 0.2s ease,
     border-color 0.2s ease,
     transform 0.15s ease;
@@ -150,31 +159,28 @@ header h1 {
 
 .upload p {
   margin: 0;
-  font-size: 1.5rem;
   line-height: 1.5;
-  color: #e5e7eb;  /* bright neutral text */
+  font-size: 1.2rem;
+  color: #e5e7eb; /* bright neutral text */
   opacity: 1;
   font-family:
-    "Calibri",
-    "Segoe UI",
-    "Inter",
-    "Helvetica Neue",
-    Arial,
-    system-ui,
-    sans-serif;
+    "Calibri", "Segoe UI",
+    "Inter", "Helvetica Neue",
+    Arial, system-ui, sans-serif;
 }
 
 .upload-main {
   display: block;
-  font-size: 2rem;
+  font-size: 1.2rem;
   font-weight: 300;
   color: #f8fafc;
+  margin-top: 20px;
 }
 
 .upload-sub {
   display: block;
   font-weight: 600;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #94a3b8;
 }
 
@@ -186,12 +192,6 @@ header h1 {
   background: rgba(74, 163, 255, 0.12);
   border-color: var(--theme);
   transform: scale(1.01);
-}
-
-.upload-icon {
-  font-size: 5rem;
-  display: inline-block;
-  margin-bottom: 5px;
 }
 
 
@@ -210,23 +210,189 @@ header h1 {
 }
 
 /* =========================
-   Glossary Table (NEW)
+   Glossary Table
    ========================= */
 
-/* Apply to both header and body cells */
+#glossary {
+  display: flex;
+  flex-direction: column;
+}
+
+.glossary-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(2, 6, 23, 0.85);
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.glossary-controls input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+  font-family: "Aldrich", sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.glossary-controls input[type="text"]::placeholder {
+  color: #64748b;
+}
+
+.glossary-controls input[type="text"]:focus {
+  border-color: var(--theme);
+  box-shadow: 0 0 0 2px rgba(74, 163, 255, 0.15);
+}
+
+.glossary-controls select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+  font-family: "Aldrich", sans-serif;
+  font-size: 0.9rem;
+  appearance: none;
+  cursor: pointer;
+}
+
+.glossary-controls select:focus {
+  border-color: var(--theme);
+  box-shadow: 0 0 0 2px rgba(74, 163, 255, 0.15);
+}
+
+.glossary-controls button {
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.9),
+    rgba(15, 23, 42, 0.9)
+  );
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+  font-family: "Aldrich", sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 2px 6px rgba(0,0,0,0.4);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.12s ease;
+}
+
+.glossary-controls button:hover {
+  border-color: var(--theme);
+  background: rgba(74, 163, 255, 0.15);
+}
+
+.glossary-controls button:active {
+  transform: translateY(1px);
+}
+
+:root {
+  --row-height: 44px;
+  --visible-rows: 10;
+}
+
+/* Scroll container */
+.table-wrapper {
+  position: relative;
+  height: calc(var(--row-height) * (var(--visible-rows) + 1));
+  /* +1 for header row */
+
+  overflow-y: auto;
+  overflow-x: auto;
+
+  border-radius: 14px;
+  border: 1px solid #1e293b;
+  background: #020617;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.table-wrapper::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 20px;
+  pointer-events: none;
+  z-index: 4;
+
+  background: linear-gradient(
+    rgba(2, 6, 23, 0),
+    rgba(2, 6, 23, 0.85)
+  );
+}
+
+
+/* Table base */
+#glossaryTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+  position: relative;
+}
+
+/* ---------- Header ---------- */
+
+#glossaryTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #020617;
+  color: #94a3b8;
+  padding: 10px;
+  text-align: left;
+  font-family: "Aldrich", sans-serif;
+  border-bottom: 1px solid #1e293b;
+}
+
+/* Alternate header columns */
+#glossaryTable thead th:nth-child(even) {
+  background: #040b1f;
+}
+
+/* ---------- Body ---------- */
+
+#glossaryTable tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #1e293b;
+  vertical-align: top;
+  position: relative;
+}
+
+#glossaryTable tbody tr {
+  height: var(--row-height);
+}
+
+#glossaryTable tbody tr:last-child td {
+  border-bottom: none;
+  box-shadow: inset 0 -1px 0 #020617;
+}
+
+/* Column striping */
 #glossaryTable th:nth-child(even),
 #glossaryTable td:nth-child(even) {
   background: rgba(255, 255, 255, 0.05);
 }
 
-#glossaryTable thead th {
-  background-color: #020617; /* solid, not transparent */
-  z-index: 3;
-}
-#glossaryTable thead th:nth-child(even) {
-  background-color: #040b1f; /* slightly lighter/darker solid tone */
-}
-
+/* Column separators */
 #glossaryTable th,
 #glossaryTable td {
   border-right: 1px solid rgba(255, 255, 255, 0.04);
@@ -237,41 +403,39 @@ header h1 {
   border-right: none;
 }
 
-.table-wrapper {
-  max-height: 520px;
-  overflow: auto;
-  border-radius: 14px;
-  border: 1px solid #1e293b;
-  background: #020617;
+/* Row hover */
+#glossaryTable tbody tr:hover {
+  background: rgba(74, 163, 255, 0.12);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 1rem;
-}
+/* ---------- Body-based column resizers ---------- */
 
-thead th {
-  position: sticky;
+.column-resizer {
+  position: absolute;
   top: 0;
-  background: #020617;
-  color: #94a3b8;
-  padding: 10px;
-  text-align: left;
-  font-family: "Aldrich", sans-serif;
-  border-bottom: 1px solid #1e293b;
-  z-index: 2;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 10;
 }
 
-tbody td {
-  padding: 10px;
-  border-bottom: 1px solid #1e293b;
-  vertical-align: top;
+.column-resizer::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-tbody tr:hover {
-  background: rgba(74, 163, 255, 0.12); /* theme hover */
+.column-resizer:hover::after {
+  opacity: 1;
 }
+
+/* ---------- Cell types ---------- */
 
 td.editable {
   cursor: text;
@@ -287,79 +451,72 @@ td.delete-cell {
   cursor: pointer;
   user-select: none;
   opacity: 0.6;
-}
-
-td.delete-cell:hover {
-  background: rgba(255, 0, 0, 0.15);
-  opacity: 1;
-}
-
-button#addRowBtn {
-  margin-bottom: 14px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-family: "Aldrich", sans-serif;
-  background: var(--theme);
-  color: #020617;
-}
-
-button#addRowBtn:hover {
-  filter: brightness(1.05);
-}
-
-.glossary-controls {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.glossary-controls input,
-.glossary-controls select {
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #1e293b;
-  background: #020617;
-  color: #e5e7eb;
-  font-family: "Aldrich", sans-serif;
-}
-
-.glossary-controls input {
-  flex: 1;
-  min-width: 220px;
-}
-
-.glossary-controls select {
-  min-width: 160px;
-}
-
-.glossary-controls button {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid #1e293b;
-  background: #020617;
-  color: #e5e7eb;
-  font-family: "Aldrich", sans-serif;
-  cursor: pointer;
-}
-
-.glossary-controls button:hover {
-  background: rgba(74, 163, 255, 0.15);
-}
-
-th {
   position: relative;
 }
 
-th .resizer {
+td.delete-cell:hover {
+  background: rgba(255, 0, 0, 0.18);
+  opacity: 1;
+}
+
+td.delete-cell:hover::after {
+  opacity: 1;
+}
+
+td.delete-cell::after {
+  content: "DELETE";
   position: absolute;
+  top: 50%;
+  right: 110%;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(220, 38, 38, 0.95);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Insert hint line (only in drag column area) */
+.insert-hint {
+  position: absolute;
+  left: 0;
   right: 0;
-  top: 0;
-  width: 4px;
-  height: 100%;
-  cursor: col-resize;
-  user-select: none;
+  height: 0;
+  pointer-events: none;
+}
+
+.insert-hint::before {
+  content: "";
+  display: block;
+  height: 2px;
+  background: var(--theme);
+  opacity: 0.9;
+}
+
+.insert-hint::after {
+  content: "+ INSERT";
+  position: absolute;
+  left: 12px;
+  top: -9px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  border-radius: 6px;
+
+  background: rgba(74, 163, 255, 0.9);
+  color: #020617;
+
+  pointer-events: none;
+}
+
+/* Drag column cell — make it hover-sensitive */
+td.drag-handle {
+  position: relative;
 }
