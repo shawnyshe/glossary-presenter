@@ -2,6 +2,13 @@ const glossaryEl = document.getElementById("glossary");
 
 let columns = [];
 let data = [];
+let activeEdit = null;
+let draggedIndex = null;
+let placeholderRow = null;
+let sortState = {
+  column: null,
+  direction: 1 // 1 = A→Z, -1 = Z→A
+};
 
 /* -----------------------------
    Existing utility functions
@@ -13,7 +20,7 @@ function setTitle(text) {
 
 function setSubtitle(text) {
   document.getElementById("appSubtitle").textContent =
-    text || "Import, View & Share Your Terminology";
+    text || "Import & Share Your Own Terminology";
 }
 
 function setAuthor(name) {
@@ -28,24 +35,39 @@ function setAuthor(name) {
   authorEl.textContent = `Created by ${name}`;
 }
 
-function updateEntryCount(visibleOnly = false) {
+function updateResultCount(visibleCount) {
   const el = document.getElementById("entryCount");
   if (!el) return;
 
-  const count = visibleOnly
-    ? getFilteredData().length
-    : data.length;
+  const total = data.length;
 
-  if (!count) {
+  // No rows at all
+  if (total === 0) {
     el.textContent = "";
     return;
   }
 
+  // No filter applied
+  const isFiltering =
+    document.getElementById("searchInput")?.value ||
+    document.getElementById("columnFilter")?.value !== "__all";
+
+  if (!isFiltering) {
+    el.textContent =
+      total === 1 ? "1 entry" : `${total} entries`;
+    return;
+  }
+
+  // Filtering active
+  if (visibleCount === 0) {
+    el.textContent = "No matching results";
+    return;
+  }
+
   el.textContent =
-    count === 1
-      ? "1 entry"
-      : `${count} entries in total`;
+    `Showing ${visibleCount} of ${total} entries`;
 }
+
 
 /* -----------------------------
    File handling
@@ -103,26 +125,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function parseCSV(text) {
   const lines = text.trim().split("\n");
-  if (lines.length < 2) return alert("CSV has no data.");
+  if (lines.length < 2) {
+    alert("CSV has no data.");
+    return;
+  }
 
   columns = lines[0].split(",").map(h => h.trim());
   data = [];
 
   lines.slice(1).forEach(line => {
     if (!line.trim()) return;
+
     const values = line.split(",");
     const row = {};
-
     columns.forEach((col, i) => {
       row[col] = values[i]?.trim() || "";
     });
+
+    // ✅ ADD THIS LINE (CRITICAL)
+    row._key = generateRowKey();
 
     data.push(row);
   });
 
   renderTable();
-  updateEntryCount();
 }
+
 
 /* -----------------------------
    Table rendering
@@ -171,64 +199,196 @@ function renderTable() {
 
   renderHeader();
   renderBody();
+  attachColumnResizers();
 }
 
 function renderHeader() {
   const header = document.getElementById("tableHeader");
   header.innerHTML = "";
 
+  // Drag handle header
+  const dragTh = document.createElement("th");
+  dragTh.textContent = "☰";
+  header.appendChild(dragTh);
+
+  // Sortable data columns (NO resizers here)
   columns.forEach(col => {
     const th = document.createElement("th");
-    th.textContent = col;
+    th.style.cursor = "pointer";
+    th.title = "Click to sort (A–Z)";
 
-    const resizer = document.createElement("div");
-    resizer.className = "resizer";
-    th.appendChild(resizer);
+    let label = col;
 
-    setupColumnResize(th, resizer);
+    if (sortState.column === col) {
+      label += sortState.direction === 1 ? " ▲" : " ▼";
+    }
+
+    th.textContent = label;
+    th.onclick = () => sortByColumn(col);
 
     header.appendChild(th);
   });
 
+  // Delete header
   const delTh = document.createElement("th");
   delTh.textContent = "❌";
   header.appendChild(delTh);
 }
 
-function setupColumnResize(th, resizer) {
-  let startX, startWidth;
 
-  resizer.addEventListener("mousedown", e => {
-    startX = e.pageX;
-    startWidth = th.offsetWidth;
+function attachColumnResizers() {
+  const wrapper = document.querySelector(".table-wrapper");
+  const table = document.getElementById("glossaryTable");
+  const headerCells = table.querySelectorAll("thead th");
 
-    document.addEventListener("mousemove", resizeColumn);
-    document.addEventListener("mouseup", stopResize);
+  // Clear existing resizers
+  wrapper.querySelectorAll(".column-resizer").forEach(el => el.remove());
+
+  headerCells.forEach((th, index) => {
+    // Skip last column (delete column)
+    if (index === headerCells.length - 1) return;
+
+    const resizer = document.createElement("div");
+    resizer.className = "column-resizer";
+    wrapper.appendChild(resizer);
+
+    function positionResizer() {
+      const thRect = th.getBoundingClientRect();
+      const wrapperRect = wrapper.getBoundingClientRect();
+      
+      resizer.style.left =
+        thRect.right
+        - wrapperRect.left
+        + wrapper.scrollLeft
+        - 3
+        + "px";
+    }
+
+    positionResizer();
+
+    resizer.addEventListener("mousedown", e => {
+      e.preventDefault();
+
+      const startX = e.pageX;
+      const startWidth = th.offsetWidth;
+
+      function onMouseMove(ev) {
+        const newWidth = Math.max(
+          60,
+          startWidth + (ev.pageX - startX)
+        );
+        th.style.width = newWidth + "px";
+        positionResizer();
+      }
+
+      function onMouseUp() {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      }
+
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    });
+
+    window.addEventListener("resize", positionResizer);
+    wrapper.addEventListener("scroll", positionResizer);
   });
+}
 
-  function resizeColumn(e) {
-    const newWidth = startWidth + (e.pageX - startX);
-    th.style.width = newWidth + "px";
-  }
+let activeInsertHint = null;
 
-  function stopResize() {
-    document.removeEventListener("mousemove", resizeColumn);
-    document.removeEventListener("mouseup", stopResize);
+document.addEventListener("click", e => {
+  if (!activeInsertHint) return;
+
+  const index = Number(activeInsertHint.dataset.insertIndex);
+  insertRowAtVisibleIndex(index);
+  removeInsertHint();
+});
+
+function showInsertHint(targetTd, edge, insertIndex) {
+  removeInsertHint();
+
+  const hint = document.createElement("div");
+  hint.className = "insert-hint";
+  hint.dataset.insertIndex = insertIndex;
+
+  hint.style.top = edge === "top" ? "0px" : "100%";
+  hint.style.left = "0";
+  hint.style.right = "0";
+
+  targetTd.appendChild(hint);
+  activeInsertHint = hint;
+}
+
+function removeInsertHint() {
+  if (activeInsertHint) {
+    activeInsertHint.remove();
+    activeInsertHint = null;
   }
 }
 
+function deleteRowByKey(key) {
+  const index = data.findIndex(r => r._key === key);
+  if (index < 0) return;
+
+  data.splice(index, 1);
+  renderBody();
+}
+
+function startEditByKey(cell, key, col) {
+  // ✅ Prevent starting a second edit
+  if (activeEdit) return;
+
+  const row = data.find(r => r._key === key);
+  if (!row) return;
+
+  activeEdit = { row, col, cell };
+
+  const originalValue = row[col];
+  const input = document.createElement("input");
+
+  input.type = "text";
+  input.value = originalValue;
+  input.style.width = "100%";
+
+  cell.textContent = "";
+  cell.appendChild(input);
+  input.focus();
+  input.select();
+
+  function commit(save) {
+    if (save) {
+      row[col] = input.value;
+    }
+    activeEdit = null;
+    renderBody(); // ✅ SAFE now
+  }
+
+  input.addEventListener("blur", () => commit(true));
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      commit(true);
+    }
+    if (e.key === "Escape") {
+      commit(false);
+    }
+  });
+}
+
 function renderBody() {
+  let visibleCount = 0;
   const body = document.getElementById("tableBody");
   body.innerHTML = "";
 
-  const query = document
-    .getElementById("searchInput")?.value
-    ?.toLowerCase() || "";
+  const query =
+    document.getElementById("searchInput")?.value.toLowerCase() || "";
 
   const columnFilter =
     document.getElementById("columnFilter")?.value || "__all";
 
   data.forEach((row, rowIndex) => {
+    // ----- FILTER CHECK -----
     let match = false;
 
     if (!query) {
@@ -243,74 +403,318 @@ function renderBody() {
         .includes(query);
     }
 
-    if (!match) return;
+    if (!match && !row._justInserted) return;
+    visibleCount++;
 
     const tr = document.createElement("tr");
+    tr.classList.add("data-row");
+    tr.dataset.rowId = row._key;
 
+    if (row._justInserted) {
+      tr.classList.add("new-row");
+      delete row._justInserted; // ✅ IMPORTANT
+    }
+
+    /* DRAG HANDLE */
+    const dragTd = document.createElement("td");
+    dragTd.className = "drag-handle";
+    dragTd.textContent = "≡";
+    dragTd.draggable = true;
+    /* drag logic (unchanged) */
+    dragTd.addEventListener("dragstart", e => {
+      if (query) {
+        alert("Clear search before reordering rows.");
+        e.preventDefault();
+        return;
+      }
+      const body = tr.parentElement;
+      const visibleRows = Array.from(body.querySelectorAll("tr.data-row"));
+      draggedIndex = visibleRows.indexOf(tr);
+      tr.classList.add("dragging");
+      placeholderRow = document.createElement("tr");
+      placeholderRow.className = "drop-placeholder";
+      placeholderRow.style.height = `${tr.offsetHeight}px`;
+      e.dataTransfer.setData("text/plain", "");
+    });
+
+    dragTd.addEventListener("dragend", () => {
+      tr.classList.remove("dragging");
+      placeholderRow?.remove();
+      placeholderRow = null;
+      draggedIndex = null;
+    });
+
+    dragTd.addEventListener("mousemove", e => {
+      if (draggedIndex !== null) return; // optional polish
+      const rect = dragTd.getBoundingClientRect();
+      const offsetY = e.clientY - rect.top;
+      const threshold = 6;
+
+      const body = tr.parentElement;
+      const visibleRows = Array.from(body.querySelectorAll("tr.data-row"));
+      const visibleIndex = visibleRows.indexOf(tr);
+      if (visibleIndex === -1) return;
+
+      if (offsetY < threshold) {
+        showInsertHint(dragTd, "top", visibleIndex);
+      } else if (offsetY > rect.height - threshold) {
+        showInsertHint(dragTd, "bottom", visibleIndex + 1);
+      } else {
+        removeInsertHint();
+      }
+    });
+
+    dragTd.addEventListener("mouseleave", removeInsertHint);
+
+    tr.appendChild(dragTd);
+
+    /* DATA CELLS */
     columns.forEach(col => {
       const td = document.createElement("td");
       td.textContent = row[col];
-      td.classList.add("editable");
-      td.onclick = () => startEdit(td, rowIndex, col);
+      td.onclick = () => startEditByKey(td, row._key, col);
       tr.appendChild(td);
     });
 
+    /* DELETE CELL */
     const delTd = document.createElement("td");
-    delTd.textContent = "?️";
     delTd.className = "delete-cell";
-    delTd.onclick = () => deleteRow(rowIndex);
+    delTd.textContent = "✖";
+    delTd.onclick = () => deleteRowByKey(row._key);
     tr.appendChild(delTd);
+
+    /* DROP LOGIC */
+    tr.addEventListener("dragover", e => {
+      e.preventDefault();
+      /*if (!placeholderRow || draggedIndex === rowIndex) return;*/
+      const visibleRows = Array.from(
+        body.querySelectorAll("tr.data-row")
+      );
+      const overVisibleIndex = visibleRows.indexOf(tr);
+      if (!placeholderRow || draggedIndex === overVisibleIndex) return;
+
+      const rect = tr.getBoundingClientRect();
+      const before = e.clientY < rect.top + rect.height / 2;
+      body.insertBefore(
+        placeholderRow,
+        before ? tr : tr.nextSibling
+      );
+
+      autoScroll(e.clientY);
+    });
+
+    tr.addEventListener("drop", e => {
+      e.preventDefault();
+
+      const visibleRows = Array.from(
+        body.querySelectorAll("tr.data-row")
+      );
+
+      const toVisibleIndex = visibleRows.indexOf(placeholderRow.nextSibling);
+
+      moveRowByVisibleIndex(draggedIndex, toVisibleIndex);
+    });
 
     body.appendChild(tr);
   });
+
+  // ✅ one update, after rendering
+  updateResultCount(visibleCount);
+}
+
+function autoScroll(mouseY) {
+  const scrollMargin = 80;
+  const scrollSpeed = 12;
+
+  if (mouseY < scrollMargin) {
+    window.scrollBy(0, -scrollSpeed);
+  } else if (window.innerHeight - mouseY < scrollMargin) {
+    window.scrollBy(0, scrollSpeed);
+  }
+}
+
+function startsWithEnglishLetter(value) {
+  if (typeof value !== "string") return false;
+
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+
+  const firstChar = trimmed[0];
+  return /^[A-Za-z]$/.test(firstChar);
+}
+
+function isEnglishColumn(col) {
+  return data.every(row => {
+    const value = row[col];
+    if (!value || !String(value).trim()) return true;
+    return startsWithEnglishLetter(String(value));
+  });
+}
+
+function parseDMY(value) {
+  if (typeof value !== "string") return null;
+
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return null;
+
+  const [, day, month, year] = match;
+  return new Date(year, month - 1, day).getTime();
+}
+
+function sortByColumn(col) {
+  if (document.getElementById("searchInput")?.value) {
+    alert("Clear search before sorting.");
+    return;
+  }
+
+  // Determine column type FIRST (before sorting)
+  const sample = data.find(row => row[col])?.[col];
+
+  const isDateColumn =
+    typeof sample === "string" && parseDMY(sample) !== null;
+
+  const isNumericColumn =
+    sample !== undefined &&
+    sample !== "" &&
+    !isNaN(Number(sample));
+
+  const isTextColumn = !isDateColumn && !isNumericColumn;
+
+  // English check applies ONLY to text columns
+  if (isTextColumn && !isEnglishColumn(col)) {
+    alert(`Column "${col}" is not English-only.`);
+    return;
+  }
+
+  // Toggle sort direction
+  if (sortState.column === col) {
+    sortState.direction *= -1;
+  } else {
+    sortState.column = col;
+    sortState.direction = 1;
+  }
+
+  // ✅ SAFE: no alerts inside comparator
+  data.sort((a, b) => {
+    const av = a[col];
+    const bv = b[col];
+
+    // 1️⃣ Date sort
+    if (isDateColumn) {
+      return (parseDMY(av) - parseDMY(bv)) * sortState.direction;
+    }
+
+    // 2️⃣ Numeric sort
+    if (isNumericColumn) {
+      return (Number(av) - Number(bv)) * sortState.direction;
+    }
+
+    // 3️⃣ Text sort
+    return String(av ?? "")
+      .localeCompare(String(bv ?? ""), "en", { sensitivity: "base" })
+      * sortState.direction;
+  });
+
+  renderBody();
+  renderHeader();
+  attachColumnResizers();
 }
 
 /* -----------------------------
    Editing
------------------------------ */
-
-function startEdit(cell, rowIndex, column) {
-  const oldValue = cell.textContent;
-  const input = document.createElement("input");
-  input.value = oldValue;
-  input.style.width = "100%";
-
-  input.addEventListener("blur", () => {
-    data[rowIndex][column] = input.value;
-    renderBody();
-  });
-
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter") input.blur();
-    if (e.key === "Escape") {
-      cell.textContent = oldValue;
-      renderBody();
-    }
-  });
-
-  cell.textContent = "";
-  cell.appendChild(input);
-  input.focus();
-}
-
-/* -----------------------------
+----------------------------- 
    Add / Delete rows
 ----------------------------- */
+
+function generateRowKey() {
+  return crypto.randomUUID();
+}
 
 function addRow() {
   const newRow = {};
   columns.forEach(col => (newRow[col] = ""));
-  data.push(newRow);
-  renderBody();
-  updateEntryCount();
+
+  newRow._key = generateRowKey();
+  newRow.ID = "000";
+  newRow._justInserted = true;
+
+  data.push(newRow);   // ✅ APPEND
+
+  if (sortState.column) {
+    sortByColumn(sortState.column);
+  } else {
+    renderBody();
+  }
+
+  // ✅ Optional: scroll new row into view
+  setTimeout(() => {
+    const rows = document.querySelectorAll("#glossaryTable tbody tr");
+    rows[rows.length - 1]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }, 0);
 }
 
-function deleteRow(index) {
+
+function insertRowAtVisibleIndex(visibleIndex) {
+  
+  const rows = document.querySelectorAll("#glossaryTable tbody tr.data-row");
+  let dataIndex = data.length;
+
+  if (visibleIndex < rows.length) {
+    const targetKey = rows[visibleIndex].dataset.rowId;
+    dataIndex = data.findIndex(r => r._key === targetKey);
+  }
+
+  if (dataIndex < 0) dataIndex = data.length;
+
+  const newRow = {};
+  columns.forEach(col => (newRow[col] = ""));
+  newRow._key = generateRowKey();
+  newRow.ID = "000";
+  newRow._justInserted = true;
+
+  data.splice(dataIndex, 0, newRow);
+
+  renderBody();
+  renderHeader();
+  attachColumnResizers();
+
+  // scroll to and highlight new row
+  setTimeout(() => {
+    const el = document.querySelector("tr.new-row");
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 0);
+}
+
+function moveRowByVisibleIndex(fromVisible, toVisible) {
+  if (fromVisible === toVisible) return;
+
+  const rows = document.querySelectorAll("tr.data-row");
+  const fromKey = rows[fromVisible]?.dataset.rowId;
+  const toKey = rows[toVisible]?.dataset.rowId;
+
+  const fromIndex = data.findIndex(r => r._key === fromKey);
+  const toIndex = toKey
+    ? data.findIndex(r => r._key === toKey)
+    : data.length;
+
+  if (fromIndex < 0 || toIndex < 0) return;
+
+  const [row] = data.splice(fromIndex, 1);
+  data.splice(toIndex, 0, row);
+
+  renderBody();
+}
+
+
+/*function deleteRow(index) {
   if (!confirm("Delete this entry?")) return;
   data.splice(index, 1);
   renderBody();
-  updateEntryCount();
-}
+  attachColumnResizers();
+}*/
 
 function getFilteredData() {
   const query =
@@ -334,6 +738,33 @@ function getFilteredData() {
       .includes(query);
   });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".inline-editable").forEach(el => {
+    let originalText = "";
+
+    el.addEventListener("focus", () => {
+      originalText = el.textContent;
+    });
+
+    el.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        el.blur(); // save
+      }
+
+      if (e.key === "Escape") {
+        el.textContent = originalText;
+        el.blur(); // cancel
+      }
+    });
+
+    el.addEventListener("blur", () => {
+      el.textContent = el.textContent.trim();
+      // optional: persist here
+    });
+  });
+});
 
 function exportCSV() {
   const rows = getFilteredData();
@@ -391,119 +822,6 @@ function getAppStyles() {
   }
 
   return css;
-}
-
-function exportHTML() {
-  const rows = getFilteredData();
-  if (!rows.length) {
-    alert("No data to export.");
-    return;
-  }
-
-  // Header metadata
-  const title = document.getElementById("appTitle")?.textContent || "";
-  const subtitle = document.getElementById("appSubtitle")?.textContent || "";
-  const author = document.getElementById("appAuthor")?.textContent || "";
-  const count = `${rows.length} entries`;
-
-  // Build column options
-  const columnOptions =
-    `<option value="__all">All columns</option>` +
-    columns.map(c => `<option value="${c}">${c}</option>`).join("");
-
-  // Build table header
-  const tableHead =
-    `<tr>` + columns.map(c => `<th>${c}</th>`).join("") + `</tr>`;
-
-  // Build table body
-  const tableBody = rows
-    .map(row =>
-      `<tr>` +
-        columns.map(c => `<td>${row[c] ?? ""}</td>`).join("") +
-      `</tr>`
-    )
-    .join("");
-
-  const appStyles = getAppStyles();
-
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Aldrich&family=Caesar+Dressing&display=swap" rel="stylesheet">
-<meta charset="UTF-8">
-<title>${title}</title>
-
-<!-- ✅ Embedded app styles -->
-<style>
-${appStyles}
-
-/* ✅ Viewer-only tweaks */
-.editable,
-.delete-cell,
-.glossary-controls button {
-  display: none;
-}
-</style>
-
-</head>
-<body>
-
-<header>
-  <h1>${title}</h1>
-  <p>${subtitle}</p>
-  <p>${author}</p>
-  <p>${count}</p>
-</header>
-
-<div class="controls">
-  <input type="text" id="searchInput" placeholder="Search...">
-  <select id="columnFilter">
-    ${columnOptions}
-  </select>
-</div>
-
-<table id="glossaryTable">
-  <thead>${tableHead}</thead>
-  <tbody>${tableBody}</tbody>
-</table>
-
-<script>
-const searchInput = document.getElementById("searchInput");
-const columnFilter = document.getElementById("columnFilter");
-const table = document.getElementById("glossaryTable");
-const rows = Array.from(table.querySelectorAll("tbody tr"));
-const headers = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent);
-
-function applyFilter() {
-  const q = searchInput.value.toLowerCase();
-  const selected = columnFilter.value;
-
-  rows.forEach(tr => {
-    const cells = Array.from(tr.children);
-    let text = "";
-
-    if (selected === "__all") {
-      text = cells.map(td => td.textContent).join(" ");
-    } else {
-      const index = headers.indexOf(selected);
-      text = index >= 0 ? cells[index].textContent : "";
-    }
-
-    tr.style.display = text.toLowerCase().includes(q) ? "" : "none";
-  });
-}
-
-searchInput.addEventListener("input", applyFilter);
-columnFilter.addEventListener("change", applyFilter);
-</script>
-
-</body>
-</html>
-`;
-
-  downloadFile(html, "glossary_viewer.html", "text/html");
 }
 
 function downloadFile(content, filename, type) {
