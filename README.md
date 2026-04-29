@@ -45,22 +45,10 @@ Built to run anywhere static files work (e.g., **GitHub Pages**).
 *   Export filtered view as:
     *   **CSV** (UTF‑8 BOM for Excel compatibility)
     *   **JSON**
-    *   **HTML presenter view** (shareable table)
 
 ### ✅ Delete UX
 
 *   Clear hover affordance + tooltip (“DELETE”)
-
-***
-
-## 🚀 Demo / Deployment (GitHub Pages)
-
-1.  Push this repo to GitHub.
-2.  Go to **Settings → Pages**.
-3.  Under **Build and deployment**, choose:
-    *   Source: `Deploy from a branch`
-    *   Branch: `main` (or `master`) and `/root`
-4.  Save → GitHub gives you a public URL.
 
 ***
 
@@ -81,21 +69,7 @@ ID,ENUS,CN,DATE,NOTES
 
 ***
 
-## 🛠 How to Run Locally
-
-Option A: open directly
-
-*   Double click `index.html`  
-    *(Some browsers restrict file APIs; a local server is better.)*
-
-Option B: run a simple local server
-
-*   VS Code: install “Live Server” → right click `index.html` → “Open with Live Server”
-*   Or any static server you like.
-
-***
-
-## 🧠 Design Notes (Important)
+## 🧠 Design Notes
 
 ### Internal row identity vs user ID
 
