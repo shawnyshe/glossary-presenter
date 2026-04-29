@@ -108,17 +108,6 @@ This prevents the classic “editing the wrong row” bug when the table is reor
 
 ***
 
-## 📁 Project Structure
-
-```text
-/
-├─ index.html
-├─ style.css
-├─ script.js
-└─ (optional) sample.csv
-```
-
-***
 
 ## ✅ Roadmap / Nice-to-haves
 
@@ -128,11 +117,3 @@ This prevents the classic “editing the wrong row” bug when the table is reor
 *   Better CSV parsing (quoted commas / RFC 4180)
 
 ***
-
-## 🙌 Credits / Notes
-
-Built as a fast, portable glossary presenter/editor that stays entirely client-side (no backend, no database).
-
-***
-
-If you want, paste your repo name + your GitHub Pages link and I can tailor the README header and add **screenshots + a short “How to use” walkthrough** section.
