@@ -1,8 +1,6 @@
 # Glossary Presenter (CSV → Editable, Sortable Table)
 
-A lightweight, **no-backend** web app that turns a CSV glossary into a **spreadsheet-like table** you can **search, filter, sort, edit, reorder, insert rows**, and **export**.
-
-Built to run anywhere static files work (e.g., **GitHub Pages**).
+A lightweight website that turns a CSV glossary into a **spreadsheet-like table** you can **search, filter, sort, edit, reorder, insert rows**, and **export**.
 
 ***
 
@@ -20,24 +18,22 @@ Built to run anywhere static files work (e.g., **GitHub Pages**).
 *   **Result counter** (e.g., “Showing 12 of 6823 entries”)
 *   **Sticky header** with internal scrolling
 *   **10-row viewport** (table scrolls inside a rounded container)
-*   **Column resizing** via full-height column borders (no header conflict)
+*   **Column resizing** via full-height column borders
 
 ### ✅ Editing
 
 *   Inline editing for any cell (click to edit, Enter/blur saves, Esc cancels)
 *   Inline editing for **subtitle** and **author** (no separate settings panel)
 
-### ✅ Sorting (Type-Aware)
+### ✅ Sorting
 
 *   Text sorting (A–Z / Z–A)
 *   **Numeric sorting** (e.g., IDs)
-*   **Date sorting** for `DD/MM/YYYY`
 *   English detection for text columns uses a practical heuristic (first letter)
 
-### ✅ Insert & Reorder (Excel-style)
+### ✅ Insert & Reorder
 
 *   **Insert row between two entries** by hovering near the left handle border
-*   Insert works while **sorted or filtered**
 *   **Drag-and-drop row reorder** using the left handle
 
 ### ✅ Export
@@ -46,9 +42,6 @@ Built to run anywhere static files work (e.g., **GitHub Pages**).
     *   **CSV** (UTF‑8 BOM for Excel compatibility)
     *   **JSON**
 
-### ✅ Delete UX
-
-*   Clear hover affordance + tooltip (“DELETE”)
 
 ***
 
@@ -57,7 +50,6 @@ Built to run anywhere static files work (e.g., **GitHub Pages**).
 *   First row must be the header row (column names).
 *   Values are read as strings.
 *   Recommended columns include things like: `ID`, `ENUS`, `CN`, `DATE`, `NOTES`, etc.
-*   Dates should be in `DD/MM/YYYY` to enable date sorting.
 
 Example:
 
@@ -80,14 +72,3 @@ To keep drag/insert/edit stable under sorting and filtering:
 
 This prevents the classic “editing the wrong row” bug when the table is reordered.
 
-***
-
-
-## ✅ Roadmap / Nice-to-haves
-
-*   Undo for delete/insert
-*   Multi-row selection
-*   Persist column widths and metadata (localStorage)
-*   Better CSV parsing (quoted commas / RFC 4180)
-
-***
