@@ -235,7 +235,6 @@ function renderHeader() {
   header.appendChild(delTh);
 }
 
-
 function attachColumnResizers() {
   const wrapper = document.querySelector(".table-wrapper");
   const table = document.getElementById("glossaryTable");
@@ -243,6 +242,9 @@ function attachColumnResizers() {
 
   // Clear existing resizers
   wrapper.querySelectorAll(".column-resizer").forEach(el => el.remove());
+
+  // We'll keep the position functions so we can update them all on scroll/resize
+  const positionFns = [];
 
   headerCells.forEach((th, index) => {
     // Skip last column (delete column)
@@ -255,16 +257,22 @@ function attachColumnResizers() {
     function positionResizer() {
       const thRect = th.getBoundingClientRect();
       const wrapperRect = wrapper.getBoundingClientRect();
-      
+
+      // ✅ Horizontal alignment (works with horizontal scroll)
       resizer.style.left =
         thRect.right
         - wrapperRect.left
         + wrapper.scrollLeft
         - 3
         + "px";
+
+      // ✅ Vertical pinning to the visible viewport (works with vertical scroll)
+      resizer.style.top = wrapper.scrollTop + "px";
+      resizer.style.height = wrapper.clientHeight + "px";
     }
 
     positionResizer();
+    positionFns.push(positionResizer);
 
     resizer.addEventListener("mousedown", e => {
       e.preventDefault();
@@ -273,11 +281,10 @@ function attachColumnResizers() {
       const startWidth = th.offsetWidth;
 
       function onMouseMove(ev) {
-        const newWidth = Math.max(
-          60,
-          startWidth + (ev.pageX - startX)
-        );
+        const newWidth = Math.max(60, startWidth + (ev.pageX - startX));
         th.style.width = newWidth + "px";
+
+        // reposition during drag
         positionResizer();
       }
 
@@ -289,10 +296,23 @@ function attachColumnResizers() {
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
     });
-
-    window.addEventListener("resize", positionResizer);
-    wrapper.addEventListener("scroll", positionResizer);
   });
+
+  // ✅ One shared updater (prevents per-column scroll listeners and keeps things smooth)
+  const updateAll = () => {
+    // use rAF to avoid layout thrash during scroll
+    requestAnimationFrame(() => positionFns.forEach(fn => fn()));
+  };
+
+  // Remove old listeners if reattaching often
+  wrapper._resizeUpdateAll && wrapper.removeEventListener("scroll", wrapper._resizeUpdateAll);
+  window._resizeUpdateAll && window.removeEventListener("resize", window._resizeUpdateAll);
+
+  wrapper._resizeUpdateAll = updateAll;
+  window._resizeUpdateAll = updateAll;
+
+  wrapper.addEventListener("scroll", updateAll);
+  window.addEventListener("resize", updateAll);
 }
 
 let activeInsertHint = null;
