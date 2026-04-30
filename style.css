@@ -413,8 +413,6 @@ header h1 {
 
 .column-resizer {
   position: absolute;
-  top: 0;
-  bottom: 0;
   width: 6px;
   cursor: col-resize;
   z-index: 10;
